@@ -1,0 +1,36 @@
+index& SVS_P_SSE(int* list, vector<index>& idx, int num) {
+	s = idx[list[0]];
+	for (int i = 1; i < num; i++) {//num个列表求交
+		int count = 0;//s中的删除指针，找到元素，则+1，未找到则erase但由于数组前移，不用+1
+		int length = s.len;
+		for (int j = 0; j < length; j++) {//s列表中的各个值比较
+			bool isExit = false;
+			__m128i ss,result;
+			ss = _mm_set1_epi32(s.arr[count]);
+			unsigned int res[4] = { 0 };
+			for (float t = 0; t < idx[list[i]].len; t+=4) {//将s中一个元素同时和list中4个数比较
+				__m128i ii;
+				ii = _mm_set_epi32(idx[list[i]].arr[t], idx[list[i]].arr[t + 1], idx[list[i]].arr[t + 2], idx[list[i]].arr[t + 3]);
+				result = _mm_set1_epi32(0);
+				result = _mm_sub_epi32(ss, ii);
+				int res[4] = { 0 };
+				_mm_storeu_si64(&res[0], result);
+				_mm_storeu_si64(&res[2], result);
+				for (int i = 0; i < 4; i++) {
+					if (res[i] == 0) {
+						isExit = true;
+						break;
+					}
+				}
+			}
+			if (isExit == false) {
+				s.len--;
+				s.arr.erase(s.arr.begin() + count);//删除第s中第j个元素
+			}
+			else {
+				count++;
+			}
+		}
+	}
+	return s;
+}
